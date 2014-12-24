@@ -12,11 +12,11 @@ class NaiveBayse:
         x_y1_count = [0 for i in range(meta_data["vector_length"])]
         for (output,x) in training_data:
             if output==0:
-                y0_count++
+                y0_count += 1
                 for i in range(meta_data["vector_length"]):
                     x_y0_count[i] = x_y0_count[i] + x[i]
             else:
-                y1_count++
+                y1_count += 1
                 for i in range(meta_data["vector_length"]):
                     x_y1_count[i] = x_y1_count[i] + x[i]
                     
@@ -31,13 +31,14 @@ class NaiveBayse:
     """
     assume the format is correct. parse the file and return processable data
     @data_path: the absolute path to the file
-    @return: an array of tuple. tuple has no elems,first is type number
-             and the second is an array of numbers.
+    @return: an array of tuple and meta data. tuple has two elems,first is type
+             number and the second is an array of numbers.
     """
     def parse(data_path):
         meta_data = dict()
         f = open(data_path)
-        while (line = f.readline()) != !!!:
+        line = f.readline()
+        while line != "!!!":
             (key,val) = f.split(":")
             meta_data[key] = int(val)
         
@@ -48,6 +49,7 @@ class NaiveBayse:
             feature_vector = [int(x) for x in vector.split(",")]
             if len(feature_vector) == meta_data("vector_length"):
                 result.append((output, feature_vector))
+        f.close()
         return result, meta_data
         
     

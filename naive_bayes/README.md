@@ -1,5 +1,5 @@
 ### usage
-python main.py \<trainin_data.mbcj\> \<testing_data.mbcj\>
+main \<trainin_data.mbcj\> \<testing_data.mbcj\>
 
 ### data format
 size:{NUMBER}<br>
