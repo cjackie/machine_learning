@@ -34,20 +34,22 @@ class NaiveBayse:
     @return: an array of tuple and meta data. tuple has two elems,first is type
              number and the second is an array of numbers.
     """
-    def parse(data_path):
+    def parse(self, data_path):
         meta_data = dict()
         f = open(data_path)
         line = f.readline()
-        while line != "!!!":
-            (key,val) = f.split(":")
+        while line != "!!!\n":
+            (key,val) = line.split(":")
             meta_data[key] = int(val)
+            line = f.readline()
         
         result = []
         for i in range(meta_data["size"]):
             line = f.readline()
             output, vector = line.split(":")
+            output = int(output)
             feature_vector = [int(x) for x in vector.split(",")]
-            if len(feature_vector) == meta_data("vector_length"):
+            if len(feature_vector) == meta_data["vector_length"]:
                 result.append((output, feature_vector))
         f.close()
         return result, meta_data
@@ -58,7 +60,7 @@ class NaiveBayse:
     @x: an input feature vector(int).
     @return: return 1 or 0
     """
-    def predict(x):
+    def predict(self, x):
         #compute the probability of output being 1, using bayse rule(denominator is not calculated)
         prob_y1 = 1
         for i in range(len(x)):
@@ -75,7 +77,7 @@ class NaiveBayse:
                 prob_y0 *= self.alpha_x_y0[i] 
             else:
                 prob_y0 *= 1-self.alpha_x_y0[i]
-        prob_y1 *= self.alpha_y0
+        prob_y0 *= 1-self.alpha_y1
 
         if prob_y0 > prob_y1:
             return 0

@@ -7,7 +7,7 @@ if __name__ == "__main__":
         print("usage:main <training_data.mbcj> <testing_data.mbcj>")
         sys.exit(1)
         
-    training_file = sys.arvg[1]
+    training_file = sys.argv[1]
     test_file = sys.argv[2]
     naive_bayse = NaiveBayse(training_file)
 
