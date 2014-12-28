@@ -10,7 +10,11 @@ class LinReg:
         names, y, X = self.parse(data_path)
         X = self.__transform(X)
         self.names = names
-        self.theta = (X.T*X).I*X.T*y
+        try:
+            self.theta = (X.T*X).I*X.T*y
+        except np.linalg.linalg.LinAlgError as e:
+            print("no psudoinverse of the training data matrix, exiting")
+            exit()
         self.__plot(X, y)
 
     """
@@ -26,7 +30,7 @@ class LinReg:
         names = line[:-1].split(",")
         X, y = [], []
         for line in f:
-            row = [int(a) for a in line.split(",")]
+            row = [float(a) for a in line.split(",")]
             y.append([row.pop(0)])
             X.append([1]+row)                        #include the intercept term
         return names, np.matrix(y), np.matrix(X)
@@ -37,12 +41,11 @@ class LinReg:
     @return: int, a numerical result predicted by the model
     """
     def predict(self,x):
-        x = [1] + x
         x_vector = self.__transform_v(np.matrix(x).T)
         if len(x) != len(self.theta):
             print("data len is inconsistent")
-            return
-        return (b*b.T).tolist()[0][0]
+            return ""
+        return (self.theta.T*x_vector).item(0,0)
         
     """
     plot the resulting model for the training data
@@ -51,7 +54,13 @@ class LinReg:
         set.
     """
     def __plot(self,X,y):
-        #TODO dimension is at most 3
+        dimension = len(self.theta)-1
+        if dimension == 1:
+            return
+            #TODO...
+        elif dimension == 2:
+            return
+            #TODO..... use mplot3d?
         
     """
     tranform the training data. This function can be modified case by
@@ -61,7 +70,7 @@ class LinReg:
     """
     def __transform(self,X):
         #customizable
-        return [self.transfrom_v(x) for x in X]
+        return np.matrix([self.__transform_v(x) for x in X.tolist()])
 
     """
     tranform a input vector.
