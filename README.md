@@ -7,6 +7,7 @@ TODO list:
 - [x] Linear Regression
 - [ ] Logistic Regression
 - [ ] Support Vector Machines
+- [ ] Gaussian Discriminant Analysis(GDA)
 - [ ] K-means Clustering
 
 ### Naive Bayes classifier
