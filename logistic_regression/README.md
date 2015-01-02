@@ -1,4 +1,5 @@
 ### usage
+require python 2.7.*
 ```shell
 cd logistic_regression
 python main.py TRAINING_DATA_PATH TEST_DATA_PATH OPTIMIZATION_CODE ALPHA RESOLUTION SHOW_PROGRESS
