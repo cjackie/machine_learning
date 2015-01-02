@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.linalg as linalg
-import numpy.linalg.norm
+from numpy.linalg import norm
 from util import parse
 from time import clock
 
@@ -72,7 +72,7 @@ class LogReg:
                     iter_c += 1
         if self._show_prog:
             print("time spending on optimization: %f", clock()-before)
-        self._theta = theta
+        return theta
         
     """
     gradient ascent
@@ -84,7 +84,7 @@ class LogReg:
     """
     def __grad(self, y, X, alpha, resolution):
         #return a function to compute gradient vector
-        def gradient(y, X):
+        def gradient(y,X):
             def g(theta):
                 m = np.matrix
                 h = lambda (x, theta): 1.0/(1+np.e**(-(self._theta.T*x).item(0,0)))    #model
@@ -94,12 +94,16 @@ class LogReg:
         
         g = gradient(y,X)
         theta = np.matrix([0]*len(X.T)).T
+        if self._show_prog:
+            before = clock()
         while True:
             g_v = g(theta)
             theta += alpha*g_v
             if self._show_prog:
                 print("gradient: %s, theta is: %s", (g_v.flatten().A[0], theta.flatten().A[0]))
             if (norm(g_v) < resolution):
+                if self._show_prog:
+                    print("the time spent on optimization: %f", clock()-before)
                 return theta
         
     """
@@ -111,8 +115,48 @@ class LogReg:
     @return, np.matrix, a vector for parameter theta
     """
     def __newton(self, y, X, alpha, resolution):
-        #TODO
+        def gradient(y,X):
+            def g(theta):
+                m = np.matrix
+                h = lambda (x, theta): 1.0/(1+np.e**(-(self._theta.T*x).item(0,0)))    #model
+                h_v = m([h(m(x).T, theta) for x in X.A]).T
+                return X.T*(y-h_v)
+            return g
         
+        def hessian(y,X):
+            def h(theta):
+                dim = len(X.T)
+                H = [[0 for i in range(dim)]
+                        for j in range(dim)]
+                e = np.e
+                m = np.matrix
+                for i in range(dim):
+                    for j in range(dim):
+                        sum = 0
+                        for x in X.A:
+                            sum += x[i]*x[j]*e**(-theta.T*m(x).T) \
+                                   /((1+e**(-theta.T*m(x).T))**2)
+                        H[i][j] = sum
+                return m(H)
+            return h
+
+        g = gradient(y,X)
+        h = hessian(y,X)
+        theta = np.matrix([0]*len(X.T)).T
+        if self._show_prog:
+            before = clock()
+        while True:
+            if g(theta) < resolution:
+                if self._show_prog:
+                    print("total time spent on optimization: %f", clock()-before)
+                return theta
+            theta = theta - h(theta).I*g(theta)
+            if self._show_prog:
+                print("gradient: %s, theta: %s", g(theta).T.A, theta.T.A)
+
+    """
+    immutable getter to theta
+    """
     @property
     def theta(self):
         return np.matrix(self._theta)
