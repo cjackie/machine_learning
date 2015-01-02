@@ -1,5 +1,5 @@
 ### Logistic equation
-<img src="http://www.sciweavers.org/tex2img.php?eq=h_%5Ctheta%3D%5Cfrac%7B1%7D%7B1%2Be%5E%7B-%5Ctheta%5ET%2Ax%7D%7D%20&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0">
+![equation](./equation.jpg)
 ### data
 Data is generated, using the function itself for testing purposes(Matlab was used)<br>
 The parameters for each data set will be specified below for you to check:<br>
