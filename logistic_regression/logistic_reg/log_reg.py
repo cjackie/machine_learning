@@ -10,8 +10,8 @@ class LogReg:
     GRADIENT_ASCENT = 'grad'
     NEWTON_METHOD = 'newton'
     
-    def __init__(self, data_path, resolution=0.1**4, alpha=0.1
-                 opt_code=STOCHASTIC_GRADIENT_ASCENT, show_prog=False):
+    def __init__(self, data_path, resolution=0.1**4, alpha=0.1, \
+                 opt_code='stoch', show_prog=False):
         (names, y, X) = parse(data_path)
         self._show_prog = show_prog
         self._theta = self.__compute_parameters(y, X, opt_code, alpha, resolution)
@@ -35,11 +35,11 @@ class LogReg:
     @return, np.matrix, a vector for parameter theta
     """
     def __compute_parameters(self, y, X, opt_code, alpha, resolution):
-        if opt_code == STOCHASTIC_GRADIENT_ASCENT:
+        if opt_code == self.STOCHASTIC_GRADIENT_ASCENT:
             return self.__stoch(y, X, alpha, resolution)
-        elif opt_code == GRADIENT_ASCENT:
+        elif opt_code == self.GRADIENT_ASCENT:
             return self.__grad(y, X, alpha, resolution)
-        elif opt_code == NEWTON_METHOD:
+        elif opt_code == self.NEWTON_METHOD:
             return self.__newton(y, X, alpha, resolution)
         else:
             print("invalid opt_code!!, exiting")
@@ -55,21 +55,20 @@ class LogReg:
     """
     def __stoch(self, y, X, alpha, resolution):
         theta = np.matrix([0]*len(X.T)).T
-        h = lambda (x, theta): 1.0/(1+np.e**(-(self._theta.T*x).item(0,0)))    #model
+        h = lambda x, theta: 1.0/(1+np.e**(-(theta.T*x).item(0,0)))    #model
         if self._show_prog:
             before = clock()
             iter_c = 1
         for i in range(len(X.A)):
             x = np.matrix(X.A[i]).T
-            for j in range(len(x)):
-                delta = alpha*(y.A[i][0] - h(x, theta))*x
-                theta += delta
-                if self._show_prog:
-                    print("for row %d: %s\n\
-                           increase by: %s\n\
-                           theta after updating: %s" \
-                           % (iter_c,X.A[i],delta.flatten().A[0],theta.flatten().A[0]));
-                    iter_c += 1
+            delta = alpha*(y.A[i][0] - h(x, theta))*x
+            theta = theta + delta
+            if self._show_prog:
+                print(("for row %d: %s\n" + \
+                       "increase by: %s\n" + \
+                       "theta after updating: %s") \
+                      % (iter_c,X.A[i],delta.flatten().A[0],theta.flatten().A[0]));
+                iter_c += 1
         if self._show_prog:
             print("time spending on optimization: %f", clock()-before)
         return theta
@@ -87,7 +86,7 @@ class LogReg:
         def gradient(y,X):
             def g(theta):
                 m = np.matrix
-                h = lambda (x, theta): 1.0/(1+np.e**(-(self._theta.T*x).item(0,0)))    #model
+                h = lambda x, theta: 1.0/(1+np.e**(-(theta.T*x).item(0,0)))    #model
                 h_v = m([h(m(x).T, theta) for x in X.A]).T
                 return X.T*(y-h_v)
             return g
@@ -98,12 +97,12 @@ class LogReg:
             before = clock()
         while True:
             g_v = g(theta)
-            theta += alpha*g_v
+            theta = theta + alpha*g_v
             if self._show_prog:
-                print("gradient: %s, theta is: %s", (g_v.flatten().A[0], theta.flatten().A[0]))
+                print("gradient: %s, theta is: %s" % (g_v.flatten().A[0], theta.flatten().A[0]))
             if (norm(g_v) < resolution):
                 if self._show_prog:
-                    print("the time spent on optimization: %f", clock()-before)
+                    print("the time spent on optimization: %f" % (clock()-before))
                 return theta
         
     """
@@ -118,7 +117,7 @@ class LogReg:
         def gradient(y,X):
             def g(theta):
                 m = np.matrix
-                h = lambda (x, theta): 1.0/(1+np.e**(-(self._theta.T*x).item(0,0)))    #model
+                h = lambda x, theta: 1.0/(1+np.e**(-(theta.T*x).item(0,0)))    #model
                 h_v = m([h(m(x).T, theta) for x in X.A]).T
                 return X.T*(y-h_v)
             return g
@@ -135,7 +134,7 @@ class LogReg:
                         sum = 0
                         for x in X.A:
                             sum += x[i]*x[j]*e**(-theta.T*m(x).T) \
-                                   /((1+e**(-theta.T*m(x).T))**2)
+                                   /((1+e**((-theta.T*m(x).T).A[0][0]))**2)
                         H[i][j] = sum
                 return m(H)
             return h
@@ -146,13 +145,13 @@ class LogReg:
         if self._show_prog:
             before = clock()
         while True:
-            if g(theta) < resolution:
+            if norm(g(theta)) < resolution:
                 if self._show_prog:
                     print("total time spent on optimization: %f", clock()-before)
                 return theta
             theta = theta - h(theta).I*g(theta)
             if self._show_prog:
-                print("gradient: %s, theta: %s", g(theta).T.A, theta.T.A)
+                print("gradient: %s, theta: %s" % (g(theta).T.A, theta.T.A))
 
     """
     immutable getter to theta

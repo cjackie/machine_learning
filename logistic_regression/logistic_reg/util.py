@@ -9,7 +9,7 @@ data format is csv with first column being output
          and column being features(including the intercept term), names is 
          the names for each columns.
 """
-def parse(self, data_path):
+def parse(data_path):
     f = open(data_path)
     line = f.readline()
     names = line[:-1].split(",")
