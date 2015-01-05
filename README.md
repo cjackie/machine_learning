@@ -21,7 +21,7 @@ The most simple yet powerful model for mapping data. It assumes the outputs are 
 A model with the output being only 2 possible states(binary output).
 
 ### Support Vector Machines
-A newest machine learning algorithm which appeared around 1990s. This algorithm is also a classification algorithm that ouputs binary value. It seperates two categories with largest margin. The result is very elegant, because the data can be transformed to other dimensions(even infinite dimesion) in linear time O(n) by using [kernel method](http://en.wikipedia.org/wiki/Kernel_method), which means high effiency in computing the result. I've read the algorithm several times, and I still can't fully understand it, but I do know how to implement it...The notion of infinite dimension(using gaussian kernel) is very interesting!!!
+A newest machine learning algorithm which appeared around 1990s. This algorithm is also a classification algorithm that ouputs binary value. It seperates two categories with largest margin. The result is very elegant, because the data can be transformed to other dimensions(even infinite dimesion) in linear time O(n) by using [kernel method](http://en.wikipedia.org/wiki/Kernel_method), which means high effiency in computing the result.The notion of infinite dimension(using gaussian kernel) is very interesting!!!
 
 ### Gaussian Discriminant Analysis
 Build a gaussian model for each different labels. To predict the label, just plug the data into each model and pick the one with highest probability.
