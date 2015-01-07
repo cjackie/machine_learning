@@ -1,4 +1,5 @@
 import numpy as np
+from random import random
 from util import parse
 
 class SVM:
@@ -32,12 +33,7 @@ class SVM:
     @return, int, -1 or 1
     """
     def predict(self, x):
-        X = self._X
-        y = self._y
-        b = self._b
-        a = self._alpha
-        a_i = self._alpha_i
-        K = self.__K
+        X,y,b,a,a_i,K,m = self._X,self._y,self._b,self._alpha,self._alpha_i,self.__K
         m = np.matrix
 
         u = 0.0
@@ -52,11 +48,104 @@ class SVM:
                    of training example, and n is input features
     @C, float, panelty weight
     @epsilon, float, accepted converging error
-    @return, (int, np.matrix), int is intercept term, and np.matrix is 
-                               alpha
+    @return, (float, np.matrix), float is intercept term, and np.matrix is 
+                                 alpha
     """
     def __optimize(self, y, X, C, epsilon):
-        #TODO
+        m = np.matrix
+        self._y = y
+        self._X = X
+        self._C = C
+        self._b = 0
+        self._epsilon = epsilon
+        self._alpha = m([C/2.0]*len(y)).T
+
+        #check if given alpha and index to the alpha
+        #return true is condition is meet, false otherwsie
+        def check(a, a_i):
+            e = epsilon
+            u = self.__u
+            if a.item(a_i,0) == 0:
+                return y.item(a_i,0)*u(np.matrix(X.A[a_i]).T) >= 1-e
+            elif a.item(a_i,0) > 0 and a.item(a_i,0) < C:
+                return y.item(a_i,0)*u(np.matrix(X.A[a_i]).T) >= 1-e \
+                    and y.item(a_i,0)*u(np.matrix(X.A[a_i]).T) <= 1+e 
+            elif a.item(a_i,0) == C:
+                return y.item(a_i,0)*u(np.matrix(X.A[a_i]).T) <= 1+e
+            else:
+                return False
+
+        #return array of index of alphas that don't meet the condition
+        def check_cond(alpha):
+            a_i = []
+            for i in range(len(alpha)):
+                if not check(alpha, i):
+                    a_i.append(i)
+            return a_i
+
+        #main loop for the optimization
+        while True:
+            a = self._alpha
+            update = self.__update
+            
+            a_i = check_cond(a)
+            for i in a_i:
+                update(i)
+                
+            a_i = check_cond(a)
+            a_i_nonb = []
+            for i in a_i:
+                if a.item(i,0) > 0 and a.item(i,0) < C:
+                    a_i_non_b.append(i)
+
+            while True:
+                for i in a_i_nonb:
+                    update(i)
+                    
+                finished = True
+                for i in a_i_nonb:
+                    if not check(a, i):
+                        finished = False
+                        break
+                    
+                if finished:
+                    break
+
+            a_i = check_cond(a)
+            if len(a_i) == 0:
+                break
+
+        return self._b, self._alpha
+                
+                    
+    """
+    optimized with respect to index to i2 in the vector alpha and b, it will find
+    the second alpha to update.
+    @i2, int, index to alpha array
+    """
+    def __update(self, i2):
+        a,b,s,K,y,X,C,u = self._alpha,self._b,self.__step,self.__K, \
+                        self._y,self._X,self._C,self.__u
+        m = np.matrix
+
+        i1 = random()*len(a)
+        i1 = i1+1 if i1 == i2 else i1
+        a1, a2 = s(i1, i2)
+        a1_o,a2_o = a.A[i1][0],a.A[i2][0]
+        y1,y2,x1,x2 = y.item(i1,0),y.item(i2,0),m(X.A[i1]).T,m(X.A[i2]).T
+
+        b1 = (u(x1)-y1) + y1*(a1-a1_o)*K(x1,x1)+y2*(a2-a2_o)*K(x1,x2)+b
+        b2 = (u(x2)-y2) + y1*(a1-a1_o)*K(x1,x2)+y2*(a2-a2_o)*K(x2,x2)+b
+        if not (a1>0 and a1<C):
+            b = b1
+        elif not (a2>0 and a2<C):
+            b=b2
+        else:
+            b = (b1+b2)/2
+        
+        a.A[i1][0] = a1
+        a.A[i2][0] = a2
+        self._b = b
 
     """
     optimize the function using coordinate descend on 2 variables
@@ -110,12 +199,7 @@ class SVM:
     @return, float, the result
     """
     def __u(self, x):
-        b = self._b
-        K = self._K
-        X = self._X
-        y = self._y
-        alpha = self._alpha
-        m = np.matrix
+        b,X,y,alpha,K,m = self._b,self._X,self._y,self._alpha,self.__K,np.matrix
 
         u = 0.0
         for i in range(len(X)):
