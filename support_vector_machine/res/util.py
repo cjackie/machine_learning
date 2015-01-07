@@ -6,8 +6,7 @@ data format is csv with first column being output
 @data_path: string, the absolute data path to the data
 @return, (names, y, X), both y, X type np.matrix and names is an array of
          string. y is a vector, X is matrix with row being each data, 
-         and column being features(including the intercept term), names is 
-         the names for each columns.
+         and column being features, names is the names for each columns.
 """
 def parse(data_path):
     f = open(data_path)
@@ -19,7 +18,7 @@ def parse(data_path):
             break;
         row = [float(a) for a in line.split(",")]
         y.append([row.pop(0)])
-        X.append([1]+row)                        #include the intercept term
+        X.append(row)                        
     return names, np.matrix(y), np.matrix(X)
 
 
